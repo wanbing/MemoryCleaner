@@ -14,9 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import butterknife.Bind;
+
 import com.john.waveview.WaveView;
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.AppsListAdapter;
 import edu.wkd.towave.memorycleaner.mvp.presenters.Presenter;
@@ -25,7 +28,6 @@ import edu.wkd.towave.memorycleaner.mvp.views.impl.fragment.AppsView;
 import edu.wkd.towave.memorycleaner.tools.SnackbarUtils;
 import edu.wkd.towave.memorycleaner.tools.StorageUtil;
 import edu.wkd.towave.memorycleaner.ui.fragment.base.BaseFragment;
-import javax.inject.Inject;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 /**
@@ -33,15 +35,16 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
  */
 public class AppsFragment extends BaseFragment implements AppsView {
 
-    @Bind(R.id.recyclerView) RecyclerView recyclerView;
-    @Bind(R.id.scanProgress) MaterialProgressBar mProgressBar;
-    @Bind(R.id.processName) TextView mTextView;
-    @Bind(R.id.wave_view) WaveView mWaveView;
-    @Bind(R.id.recyclerfastscroll) RecyclerFastScroller mRecyclerFastScroller;
-    @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Bind(R.id.refresher) SwipeRefreshLayout mSwipeRefreshLayout;
-    @Bind(R.id.coordinatorLayout) CoordinatorLayout mCoordinatorLayout;
-    @Inject AppsPresenter mAppsPresenter;
+    RecyclerView recyclerView;
+    MaterialProgressBar mProgressBar;
+    TextView mTextView;
+    WaveView mWaveView;
+    RecyclerFastScroller mRecyclerFastScroller;
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    CoordinatorLayout mCoordinatorLayout;
+    @Inject
+    AppsPresenter mAppsPresenter;
 
     public static final String ARG_POSITION = "position";
 
@@ -57,7 +60,8 @@ public class AppsFragment extends BaseFragment implements AppsView {
     }
 
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -65,45 +69,65 @@ public class AppsFragment extends BaseFragment implements AppsView {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+    @Override
+    protected void bindView(View view) {
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        mProgressBar = (MaterialProgressBar) view.findViewById(R.id.scanProgress);
+        mTextView = (TextView) view.findViewById(R.id.processName);
+        mWaveView = (WaveView) view.findViewById(R.id.wave_view);
+        mRecyclerFastScroller = (RecyclerFastScroller) view.findViewById(R.id.recyclerfastscroll);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) view.findViewById(R.id.toolbar_layout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresher);
+        mCoordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorLayout);
+    }
 
-    @Override protected int getLayoutView() {
+
+    @Override
+    protected int getLayoutView() {
         return R.layout.include_memory_clean;
     }
 
 
-    @Override protected Presenter getPresenter() {
+    @Override
+    protected Presenter getPresenter() {
         return mAppsPresenter;
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         super.initializeDependencyInjector();
         mBuilder.inject(this);
     }
 
 
-    @Override public void onResume() {
+    @Override
+    public void onResume() {
         super.onResume();
         mAppsPresenter.onResume();
     }
 
 
-    @Override public void stopRefresh() {
+    @Override
+    public void stopRefresh() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
 
-    @Override public void startRefresh() {
+    @Override
+    public void startRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
 
-    @Override public boolean isRefreshing() {
+    @Override
+    public boolean isRefreshing() {
         return mSwipeRefreshLayout.isRefreshing();
     }
 
 
-    @Override public void enableSwipeRefreshLayout(boolean enable) {
+    @Override
+    public void enableSwipeRefreshLayout(boolean enable) {
         mSwipeRefreshLayout.setEnabled(enable);
     }
 
@@ -122,7 +146,7 @@ public class AppsFragment extends BaseFragment implements AppsView {
         mSwipeRefreshLayout.setOnRefreshListener(mAppsPresenter);
         TypedValue typedValue = new TypedValue();
         context.getTheme()
-               .resolveAttribute(R.attr.colorPrimary, typedValue, true);
+                .resolveAttribute(R.attr.colorPrimary, typedValue, true);
         mSwipeRefreshLayout.setColorSchemeColors(typedValue.data);
         mRecyclerFastScroller.attachRecyclerView(recyclerView);
     }
@@ -135,12 +159,13 @@ public class AppsFragment extends BaseFragment implements AppsView {
     //}
 
 
-    @Override public RelativeLayout setDialogValues(String[] memory) {
+    @Override
+    public RelativeLayout setDialogValues(String[] memory) {
         RelativeLayout dialog_process_detail
                 = (RelativeLayout) getActivity().getLayoutInflater()
-                                                .inflate(
-                                                        R.layout.dialog_process_detail,
-                                                        null);
+                .inflate(
+                        R.layout.dialog_process_detail,
+                        null);
         if (memory == null || memory.length == 0) return dialog_process_detail;
         TextView mTextView2 = (TextView) dialog_process_detail.findViewById(
                 R.id.memory);
@@ -152,7 +177,8 @@ public class AppsFragment extends BaseFragment implements AppsView {
     }
 
 
-    @Override public void showSnackBar(String message) {
+    @Override
+    public void showSnackBar(String message) {
         SnackbarUtils.show(getActivity(), message);
     }
 
@@ -167,7 +193,8 @@ public class AppsFragment extends BaseFragment implements AppsView {
     }
 
 
-    @Override public void onPreExecute() {
+    @Override
+    public void onPreExecute() {
         mCollapsingToolbarLayout.setTitle("0M");
         mWaveView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -177,7 +204,8 @@ public class AppsFragment extends BaseFragment implements AppsView {
     }
 
 
-    @Override public void onDestroy() {
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         mAppsPresenter.onDestroy();
     }
@@ -193,7 +221,8 @@ public class AppsFragment extends BaseFragment implements AppsView {
     }
 
 
-    @Override public void onDestroyView() {
+    @Override
+    public void onDestroyView() {
         mAppsPresenter.onDestroy();
         super.onDestroyView();
     }

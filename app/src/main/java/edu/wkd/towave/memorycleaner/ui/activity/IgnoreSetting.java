@@ -14,12 +14,14 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.widget.TextView;
-import butterknife.Bind;
-import butterknife.OnClick;
+
 import com.john.waveview.WaveView;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.App;
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.IgnoreListAdapter;
@@ -29,33 +31,54 @@ import edu.wkd.towave.memorycleaner.mvp.presenters.impl.activity.IgnoreSettingPr
 import edu.wkd.towave.memorycleaner.mvp.views.impl.activity.IgnoreSettingView;
 import edu.wkd.towave.memorycleaner.tools.SnackbarUtils;
 import edu.wkd.towave.memorycleaner.ui.activity.base.BaseActivity;
-import javax.inject.Inject;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class IgnoreSetting extends BaseActivity implements IgnoreSettingView {
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.recyclerView) RecyclerView recyclerView;
-    @Bind(R.id.scanProgress) MaterialProgressBar mProgressBar;
-    @Bind(R.id.processName) TextView mTextView;
-    @Bind(R.id.wave_view) WaveView mWaveView;
-    @Bind(R.id.recyclerfastscroll) RecyclerFastScroller mRecyclerFastScroller;
-    @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Bind(R.id.clean_memory) FloatingActionButton mFloatingActionButton;
-    @Bind(R.id.refresher) SwipeRefreshLayout mSwipeRefreshLayout;
-    @Inject IgnoreSettingPresenter mIgnoreSettingPresenter;
+    Toolbar toolbar;
+    RecyclerView recyclerView;
+    MaterialProgressBar mProgressBar;
+    TextView mTextView;
+    WaveView mWaveView;
+    RecyclerFastScroller mRecyclerFastScroller;
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    FloatingActionButton mFloatingActionButton;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    @Inject
+    IgnoreSettingPresenter mIgnoreSettingPresenter;
     public static final int BASE_ID = 0;
     public static final int GROUP_ID = 100;
     MenuItem mMenuItem;
 
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializePresenter();
         mIgnoreSettingPresenter.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected void bindView() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mProgressBar = (MaterialProgressBar) findViewById(R.id.scanProgress);
+        mTextView = (TextView) findViewById(R.id.processName);
+        mWaveView = (WaveView) findViewById(R.id.wave_view);
+        mRecyclerFastScroller = (RecyclerFastScroller) findViewById(R.id.recyclerfastscroll);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        mFloatingActionButton = (FloatingActionButton) findViewById(R.id.clean_memory);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresher);
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cleanMemory();
+            }
+        });
+    }
 
-    @Override public void onDestroy() {
+
+    @Override
+    public void onDestroy() {
         super.onDestroy();
     }
 
@@ -65,30 +88,34 @@ public class IgnoreSetting extends BaseActivity implements IgnoreSettingView {
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         App app = (App) getApplication();
         mActivityComponent = DaggerActivityComponent.builder()
-                                                    .activityModule(
-                                                            new ActivityModule(
-                                                                    this))
-                                                    .appComponent(
-                                                            app.getAppComponent())
-                                                    .build();
+                .activityModule(
+                        new ActivityModule(
+                                this))
+                .appComponent(
+                        app.getAppComponent())
+                .build();
         mActivityComponent.inject(this);
     }
 
 
-    @Override protected void initToolbar() {
+    @Override
+    protected void initToolbar() {
         super.initToolbar(toolbar);
     }
 
 
-    @Override protected int getLayoutView() {
+    @Override
+    protected int getLayoutView() {
         return R.layout.activity_memory_clean;
     }
 
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_ignore_setting, menu);
         SubMenu subMenu = menu.addSubMenu(GROUP_ID, BASE_ID, 0, "排序");
@@ -96,8 +123,8 @@ public class IgnoreSetting extends BaseActivity implements IgnoreSettingView {
         subMenu.add(GROUP_ID + 1, BASE_ID + 1, 0, "应用名");
         subMenu.add(GROUP_ID + 1, BASE_ID + 2, 1, "选中");
         subMenu.add(GROUP_ID + 2, BASE_ID + 3, 2, "降序")
-               .setCheckable(true)
-               .setChecked(true);
+                .setCheckable(true)
+                .setChecked(true);
         subMenu.setGroupCheckable(GROUP_ID + 1, true, true);
         mMenuItem = menu.findItem(R.id.allcheck);
         ActionItemBadge.update(this, mMenuItem, FontAwesome.Icon.faw_check,
@@ -122,47 +149,55 @@ public class IgnoreSetting extends BaseActivity implements IgnoreSettingView {
     }
 
 
-    @OnClick(R.id.clean_memory) public void cleanMemory() {
+    public void cleanMemory() {
         mIgnoreSettingPresenter.cleanMemory();
     }
 
 
-    @Override public void stopRefresh() {
+    @Override
+    public void stopRefresh() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
 
-    @Override public void startRefresh() {
+    @Override
+    public void startRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
 
-    @Override public boolean isRefreshing() {
+    @Override
+    public boolean isRefreshing() {
         return mSwipeRefreshLayout.isRefreshing();
     }
 
 
-    @Override public void enableSwipeRefreshLayout(boolean enable) {
+    @Override
+    public void enableSwipeRefreshLayout(boolean enable) {
         mSwipeRefreshLayout.setEnabled(enable);
     }
 
 
-    @Override public void showSnackBar(String message) {
+    @Override
+    public void showSnackBar(String message) {
         SnackbarUtils.show(mFloatingActionButton, message);
     }
 
 
-    @Override public void updateBadge(int count) {
+    @Override
+    public void updateBadge(int count) {
         ActionItemBadge.update(mMenuItem, count);
     }
 
 
-    @Override public void updateTitle(Context context, long size) {
+    @Override
+    public void updateTitle(Context context, long size) {
         mCollapsingToolbarLayout.setTitle(size + "个应用");
     }
 
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (mIgnoreSettingPresenter.onOptionsItemSelected(item)) {
             return true;
         }

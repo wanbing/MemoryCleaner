@@ -15,12 +15,16 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import butterknife.Bind;
-import butterknife.OnClick;
+
 import com.john.waveview.WaveView;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
+
+import java.math.BigDecimal;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.App;
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.ProcessListAdapter;
@@ -32,34 +36,54 @@ import edu.wkd.towave.memorycleaner.tools.AppUtils;
 import edu.wkd.towave.memorycleaner.tools.SnackbarUtils;
 import edu.wkd.towave.memorycleaner.tools.TextFormater;
 import edu.wkd.towave.memorycleaner.ui.activity.base.BaseActivity;
-import java.math.BigDecimal;
-import javax.inject.Inject;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class MemoryClean extends BaseActivity implements MemoryCleanView {
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.recyclerView) RecyclerView recyclerView;
-    @Bind(R.id.scanProgress) MaterialProgressBar mProgressBar;
-    @Bind(R.id.processName) TextView mTextView;
-    @Bind(R.id.wave_view) WaveView mWaveView;
-    @Bind(R.id.recyclerfastscroll) RecyclerFastScroller mRecyclerFastScroller;
-    @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Bind(R.id.clean_memory) FloatingActionButton mFloatingActionButton;
-    @Bind(R.id.refresher) SwipeRefreshLayout mSwipeRefreshLayout;
-    @Inject MemoryCleanPresenter mMemoryCleanPresenter;
+    Toolbar toolbar;
+    RecyclerView recyclerView;
+    MaterialProgressBar mProgressBar;
+    TextView mTextView;
+    WaveView mWaveView;
+    RecyclerFastScroller mRecyclerFastScroller;
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    FloatingActionButton mFloatingActionButton;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    @Inject
+    MemoryCleanPresenter mMemoryCleanPresenter;
     public static final int BASE_ID = 0;
     public static final int GROUP_ID = 100;
     MenuItem mMenuItem;
 
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializePresenter();
         mMemoryCleanPresenter.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected void bindView() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mProgressBar = (MaterialProgressBar) findViewById(R.id.scanProgress);
+        mTextView = (TextView) findViewById(R.id.processName);
+        mWaveView = (WaveView) findViewById(R.id.wave_view);
+        mRecyclerFastScroller = (RecyclerFastScroller) findViewById(R.id.recyclerfastscroll);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        mFloatingActionButton = (FloatingActionButton) findViewById(R.id.clean_memory);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresher);
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cleanMemory();
+            }
+        });
+    }
 
-    @Override public void onDestroy() {
+
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         mMemoryCleanPresenter.onDestroy();
     }
@@ -70,30 +94,34 @@ public class MemoryClean extends BaseActivity implements MemoryCleanView {
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         App app = (App) getApplication();
         mActivityComponent = DaggerActivityComponent.builder()
-                                                    .activityModule(
-                                                            new ActivityModule(
-                                                                    this))
-                                                    .appComponent(
-                                                            app.getAppComponent())
-                                                    .build();
+                .activityModule(
+                        new ActivityModule(
+                                this))
+                .appComponent(
+                        app.getAppComponent())
+                .build();
         mActivityComponent.inject(this);
     }
 
 
-    @Override protected void initToolbar() {
+    @Override
+    protected void initToolbar() {
         super.initToolbar(toolbar);
     }
 
 
-    @Override protected int getLayoutView() {
+    @Override
+    protected int getLayoutView() {
         return R.layout.activity_memory_clean;
     }
 
 
-    @Override public boolean onCreateOptionsMenu(Menu menu) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_memory_clean, menu);
         SubMenu subMenu = menu.addSubMenu(GROUP_ID, BASE_ID, 0, "排序");
@@ -102,8 +130,8 @@ public class MemoryClean extends BaseActivity implements MemoryCleanView {
         subMenu.add(GROUP_ID + 1, BASE_ID + 2, 1, "大小");
         subMenu.add(GROUP_ID + 1, BASE_ID + 3, 2, "选中");
         subMenu.add(GROUP_ID + 2, BASE_ID + 4, 3, "降序")
-               .setCheckable(true)
-               .setChecked(true);
+                .setCheckable(true)
+                .setChecked(true);
         subMenu.setGroupCheckable(GROUP_ID + 1, true, true);
         mMenuItem = menu.findItem(R.id.allcheck);
         ActionItemBadge.update(this, mMenuItem, FontAwesome.Icon.faw_check,
@@ -126,7 +154,8 @@ public class MemoryClean extends BaseActivity implements MemoryCleanView {
     }
 
 
-    @Override public void onScanStarted(Context context) {
+    @Override
+    public void onScanStarted(Context context) {
         mFloatingActionButton.setVisibility(View.GONE);
         mCollapsingToolbarLayout.setTitle(
                 "0M 0%-->" + AppUtils.getPercent(context) + "%");
@@ -149,14 +178,16 @@ public class MemoryClean extends BaseActivity implements MemoryCleanView {
     }
 
 
-    @Override public void onScanCompleted() {
+    @Override
+    public void onScanCompleted() {
         mFloatingActionButton.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.GONE);
         mTextView.setVisibility(View.GONE);
     }
 
 
-    @Override public RelativeLayout setDialogValues(String[] memory) {
+    @Override
+    public RelativeLayout setDialogValues(String[] memory) {
         RelativeLayout dialog_process_detail
                 = (RelativeLayout) getLayoutInflater().inflate(
                 R.layout.dialog_process_detail, null);
@@ -171,42 +202,49 @@ public class MemoryClean extends BaseActivity implements MemoryCleanView {
     }
 
 
-    @OnClick(R.id.clean_memory) public void cleanMemory() {
+    public void cleanMemory() {
         mMemoryCleanPresenter.cleanMemory();
     }
 
 
-    @Override public void stopRefresh() {
+    @Override
+    public void stopRefresh() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
 
-    @Override public void startRefresh() {
+    @Override
+    public void startRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
 
-    @Override public boolean isRefreshing() {
+    @Override
+    public boolean isRefreshing() {
         return mSwipeRefreshLayout.isRefreshing();
     }
 
 
-    @Override public void enableSwipeRefreshLayout(boolean enable) {
+    @Override
+    public void enableSwipeRefreshLayout(boolean enable) {
         mSwipeRefreshLayout.setEnabled(enable);
     }
 
 
-    @Override public void showSnackBar(String message) {
+    @Override
+    public void showSnackBar(String message) {
         SnackbarUtils.show(mFloatingActionButton, message);
     }
 
 
-    @Override public void updateBadge(int count) {
+    @Override
+    public void updateBadge(int count) {
         ActionItemBadge.update(mMenuItem, count);
     }
 
 
-    @Override public void updateTitle(Context context, long memory) {
+    @Override
+    public void updateTitle(Context context, long memory) {
         float scanMemoryPercent = AppUtils.getPercent(memory);
         mCollapsingToolbarLayout.setTitle(
                 TextFormater.dataSizeFormat(memory) + " " +
@@ -219,7 +257,8 @@ public class MemoryClean extends BaseActivity implements MemoryCleanView {
     }
 
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (mMemoryCleanPresenter.onOptionsItemSelected(item)) {
             return true;
         }

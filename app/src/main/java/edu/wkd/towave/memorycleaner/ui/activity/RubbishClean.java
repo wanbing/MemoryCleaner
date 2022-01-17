@@ -12,10 +12,12 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import butterknife.Bind;
-import butterknife.OnClick;
+
 import com.john.waveview.WaveView;
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.App;
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.CacheListAdapter;
@@ -26,30 +28,51 @@ import edu.wkd.towave.memorycleaner.mvp.views.impl.activity.RubbishCleanView;
 import edu.wkd.towave.memorycleaner.tools.SnackbarUtils;
 import edu.wkd.towave.memorycleaner.tools.TextFormater;
 import edu.wkd.towave.memorycleaner.ui.activity.base.BaseActivity;
-import javax.inject.Inject;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class RubbishClean extends BaseActivity implements RubbishCleanView {
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    @Bind(R.id.recyclerView) RecyclerView recyclerView;
-    @Bind(R.id.scanProgress) MaterialProgressBar mProgressBar;
-    @Bind(R.id.processName) TextView mTextView;
-    @Bind(R.id.wave_view) WaveView mWaveView;
-    @Bind(R.id.recyclerfastscroll) RecyclerFastScroller mRecyclerFastScroller;
-    @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Bind(R.id.clean_memory) FloatingActionButton mFloatingActionButton;
-    @Bind(R.id.refresher) SwipeRefreshLayout mSwipeRefreshLayout;
-    @Inject RubbishCleanPresenter mRubbishCleanPresenter;
+    Toolbar toolbar;
+    RecyclerView recyclerView;
+    MaterialProgressBar mProgressBar;
+    TextView mTextView;
+    WaveView mWaveView;
+    RecyclerFastScroller mRecyclerFastScroller;
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    FloatingActionButton mFloatingActionButton;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    @Inject
+    RubbishCleanPresenter mRubbishCleanPresenter;
 
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializePresenter();
         mRubbishCleanPresenter.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected void bindView() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mProgressBar = (MaterialProgressBar) findViewById(R.id.scanProgress);
+        mTextView = (TextView) findViewById(R.id.processName);
+        mWaveView = (WaveView) findViewById(R.id.wave_view);
+        mRecyclerFastScroller = (RecyclerFastScroller) findViewById(R.id.recyclerfastscroll);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        mFloatingActionButton = (FloatingActionButton) findViewById(R.id.clean_memory);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresher);
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                cleanMemory();
+            }
+        });
+    }
 
-    @Override public void onDestroy() {
+
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         mRubbishCleanPresenter.onDestroy();
     }
@@ -60,25 +83,28 @@ public class RubbishClean extends BaseActivity implements RubbishCleanView {
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         App app = (App) getApplication();
         mActivityComponent = DaggerActivityComponent.builder()
-                                                    .activityModule(
-                                                            new ActivityModule(
-                                                                    this))
-                                                    .appComponent(
-                                                            app.getAppComponent())
-                                                    .build();
+                .activityModule(
+                        new ActivityModule(
+                                this))
+                .appComponent(
+                        app.getAppComponent())
+                .build();
         mActivityComponent.inject(this);
     }
 
 
-    @Override protected void initToolbar() {
+    @Override
+    protected void initToolbar() {
         super.initToolbar(toolbar);
     }
 
 
-    @Override protected int getLayoutView() {
+    @Override
+    protected int getLayoutView() {
         return R.layout.activity_memory_clean;
     }
 
@@ -97,7 +123,8 @@ public class RubbishClean extends BaseActivity implements RubbishCleanView {
     }
 
 
-    @Override public void onScanStarted(Context context) {
+    @Override
+    public void onScanStarted(Context context) {
         mFloatingActionButton.setVisibility(View.GONE);
         mCollapsingToolbarLayout.setTitle("0KB 可清理");
         mWaveView.setVisibility(View.GONE);
@@ -119,44 +146,51 @@ public class RubbishClean extends BaseActivity implements RubbishCleanView {
     }
 
 
-    @Override public void onScanCompleted() {
+    @Override
+    public void onScanCompleted() {
         mFloatingActionButton.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.GONE);
         mTextView.setVisibility(View.GONE);
     }
 
 
-    @OnClick(R.id.clean_memory) public void cleanMemory() {
+    public void cleanMemory() {
         mRubbishCleanPresenter.cleanCache();
     }
 
 
-    @Override public void stopRefresh() {
+    @Override
+    public void stopRefresh() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
 
-    @Override public void startRefresh() {
+    @Override
+    public void startRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
 
-    @Override public boolean isRefreshing() {
+    @Override
+    public boolean isRefreshing() {
         return mSwipeRefreshLayout.isRefreshing();
     }
 
 
-    @Override public void enableSwipeRefreshLayout(boolean enable) {
+    @Override
+    public void enableSwipeRefreshLayout(boolean enable) {
         mSwipeRefreshLayout.setEnabled(enable);
     }
 
 
-    @Override public void showSnackbar(String message) {
+    @Override
+    public void showSnackbar(String message) {
         SnackbarUtils.show(mFloatingActionButton, message);
     }
 
 
-    @Override public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (mRubbishCleanPresenter.onOptionsItemSelected(item.getItemId())) {
             return true;
         }

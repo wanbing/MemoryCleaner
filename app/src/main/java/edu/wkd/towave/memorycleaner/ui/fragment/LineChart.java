@@ -6,13 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.Bind;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.mvp.presenters.Presenter;
 import edu.wkd.towave.memorycleaner.mvp.presenters.impl.fragment.LineChartPresenter;
 import edu.wkd.towave.memorycleaner.mvp.views.impl.fragment.LineChartView;
 import edu.wkd.towave.memorycleaner.ui.fragment.base.BaseFragment;
-import javax.inject.Inject;
 import lecho.lib.hellocharts.model.LineChartData;
 
 /**
@@ -20,38 +21,50 @@ import lecho.lib.hellocharts.model.LineChartData;
  */
 public class LineChart extends BaseFragment implements LineChartView {
 
-    @Bind(R.id.linechartview) lecho.lib.hellocharts.view.LineChartView
+    lecho.lib.hellocharts.view.LineChartView
             mLineChartView;
-    @Bind(R.id.percent) TextView mTextView;
+    TextView mTextView;
 
-    @Inject LineChartPresenter mLineChartPresenter;
+    @Inject
+    LineChartPresenter mLineChartPresenter;
 
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+    @Override
+    protected void bindView(View view) {
+        mLineChartView = (lecho.lib.hellocharts.view.LineChartView) view.findViewById(R.id.linechartview);
+        mTextView = (TextView) view.findViewById(R.id.percent);
+    }
 
-    @Override protected int getLayoutView() {
+
+    @Override
+    protected int getLayoutView() {
         return R.layout.fragment_linechartview;
     }
 
 
-    @Override protected Presenter getPresenter() {
+    @Override
+    protected Presenter getPresenter() {
         return mLineChartPresenter;
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         super.initializeDependencyInjector();
         mBuilder.inject(this);
     }
 
 
-    @Override public int initViews() {
+    @Override
+    public int initViews() {
         mTextView.setTextColor(getColorPrimary());
         mLineChartView.setInteractive(false);
         return getColorPrimary();
@@ -65,7 +78,8 @@ public class LineChart extends BaseFragment implements LineChartView {
     }
 
 
-    @Override public void onDestroy() {
+    @Override
+    public void onDestroy() {
         mLineChartPresenter.onDestroy();
         super.onDestroy();
     }

@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.ButterKnife;
+
 import edu.wkd.towave.memorycleaner.injector.component.DaggerFragmentComponent;
 import edu.wkd.towave.memorycleaner.injector.component.FragmentComponent;
 import edu.wkd.towave.memorycleaner.injector.module.FragmentModule;
@@ -24,17 +24,20 @@ public abstract class BaseFragment extends Fragment
     protected FragmentComponent mBuilder;
 
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(getLayoutView(), null);
         initializeDependencyInjector();
         initializePresenter();
-        ButterKnife.bind(this, view);
+        bindView(view);
         getPresenter().onCreate(savedInstanceState);
         return view;
     }
+
+    protected abstract void bindView(View view);
 
 
     public int getColorPrimary() {
@@ -44,15 +47,16 @@ public abstract class BaseFragment extends Fragment
 
     protected void initializeDependencyInjector() {
         mBuilder = DaggerFragmentComponent.builder()
-                                          .fragmentModule(new FragmentModule())
-                                          .activityComponent(
-                                                  activity.getActivityComponent())
-                                          .build();
+                .fragmentModule(new FragmentModule())
+                .activityComponent(
+                        activity.getActivityComponent())
+                .build();
     }
 
 
     //在Fragment绑定中，对Fragment中的Activity成员变量进行初始化，防止每次调用getActivity造成性能损失。
-    @Override public void onAttach(Activity activity) {
+    @Override
+    public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (getActivity() != null) {
             this.activity = (BaseActivity) getActivity();
@@ -60,7 +64,8 @@ public abstract class BaseFragment extends Fragment
     }
 
 
-    protected abstract @LayoutRes int getLayoutView();
+    protected abstract @LayoutRes
+    int getLayoutView();
 
     protected abstract Presenter getPresenter();
 
@@ -70,8 +75,8 @@ public abstract class BaseFragment extends Fragment
     }
 
 
-    @Override public void onDestroyView() {
+    @Override
+    public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
     }
 }

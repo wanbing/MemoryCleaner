@@ -5,8 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
 import edu.wkd.towave.memorycleaner.R;
 
 /**
@@ -14,17 +13,13 @@ import edu.wkd.towave.memorycleaner.R;
  */
 public class MenuItemViewHolder extends RecyclerView.ViewHolder {
 
-    @Bind(R.id.icon) ImageView mImageView;
-    @Bind(R.id.content) TextView mTextView;
-    //ImageView mImageView;
-    //TextView mTextView;
-
+    ImageView mImageView;
+    TextView mTextView;
 
     public MenuItemViewHolder(View parent) {
         super(parent);
-        ButterKnife.bind(this, parent);
-        //mImageView = (ImageView) parent.findViewById(R.id.icon);
-        //mTextView = (TextView) parent.findViewById(R.id.content);
+        mImageView = (ImageView) parent.findViewById(R.id.icon);
+        mTextView = (TextView) parent.findViewById(R.id.content);
     }
 
 

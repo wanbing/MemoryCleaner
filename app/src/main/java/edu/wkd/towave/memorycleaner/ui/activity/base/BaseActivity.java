@@ -11,7 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import butterknife.ButterKnife;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.injector.component.ActivityComponent;
@@ -37,9 +36,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         initWindow();
         initializeDependencyInjector();
         setContentView(getLayoutView());
-        ButterKnife.bind(this);
+        bindView();
         initToolbar();
     }
+
+    protected abstract void bindView();
 
 
     private void initTheme() {

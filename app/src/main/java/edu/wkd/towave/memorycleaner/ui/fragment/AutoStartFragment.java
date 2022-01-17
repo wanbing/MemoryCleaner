@@ -14,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.Bind;
-import butterknife.OnClick;
+
 import com.john.waveview.WaveView;
 import com.pluscubed.recyclerfastscroll.RecyclerFastScroller;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.AutoStartAdapter;
 import edu.wkd.towave.memorycleaner.mvp.presenters.Presenter;
@@ -25,7 +27,6 @@ import edu.wkd.towave.memorycleaner.mvp.presenters.impl.fragment.AutoStartPresen
 import edu.wkd.towave.memorycleaner.mvp.views.impl.fragment.AutoStartView;
 import edu.wkd.towave.memorycleaner.tools.SnackbarUtils;
 import edu.wkd.towave.memorycleaner.ui.fragment.base.BaseFragment;
-import javax.inject.Inject;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 /**
@@ -33,16 +34,17 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
  */
 public class AutoStartFragment extends BaseFragment implements AutoStartView {
 
-    @Bind(R.id.recyclerView) RecyclerView recyclerView;
-    @Bind(R.id.scanProgress) MaterialProgressBar mProgressBar;
-    @Bind(R.id.processName) TextView mTextView;
-    @Bind(R.id.wave_view) WaveView mWaveView;
-    @Bind(R.id.recyclerfastscroll) RecyclerFastScroller mRecyclerFastScroller;
-    @Bind(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Bind(R.id.refresher) SwipeRefreshLayout mSwipeRefreshLayout;
-    @Bind(R.id.coordinatorLayout) CoordinatorLayout mCoordinatorLayout;
-    @Bind(R.id.disableApps) FloatingActionButton mFloatingActionButton;
-    @Inject AutoStartPresenter mAutoStartPresenter;
+    RecyclerView recyclerView;
+    MaterialProgressBar mProgressBar;
+    TextView mTextView;
+    WaveView mWaveView;
+    RecyclerFastScroller mRecyclerFastScroller;
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    CoordinatorLayout mCoordinatorLayout;
+    FloatingActionButton mFloatingActionButton;
+    @Inject
+    AutoStartPresenter mAutoStartPresenter;
 
     public static final String ARG_POSITION = "position";
 
@@ -57,7 +59,8 @@ public class AutoStartFragment extends BaseFragment implements AutoStartView {
     }
 
 
-    @Nullable @Override
+    @Nullable
+    @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -65,45 +68,72 @@ public class AutoStartFragment extends BaseFragment implements AutoStartView {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+    @Override
+    protected void bindView(View view) {
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        mProgressBar = (MaterialProgressBar) view.findViewById(R.id.scanProgress);
+        mTextView = (TextView) view.findViewById(R.id.processName);
+        mWaveView = (WaveView) view.findViewById(R.id.wave_view);
+        mRecyclerFastScroller = (RecyclerFastScroller) view.findViewById(R.id.recyclerfastscroll);
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout) view.findViewById(R.id.toolbar_layout);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresher);
+        mCoordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorLayout);
+        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.disableApps);
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                disableApps();
+            }
+        });
+    }
 
-    @Override protected int getLayoutView() {
+
+    @Override
+    protected int getLayoutView() {
         return R.layout.include_memory_clean;
     }
 
 
-    @Override protected Presenter getPresenter() {
+    @Override
+    protected Presenter getPresenter() {
         return mAutoStartPresenter;
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         super.initializeDependencyInjector();
         mBuilder.inject(this);
     }
 
 
-    @Override public void onResume() {
+    @Override
+    public void onResume() {
         super.onResume();
         mAutoStartPresenter.onResume();
     }
 
 
-    @Override public void stopRefresh() {
+    @Override
+    public void stopRefresh() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
 
-    @Override public void startRefresh() {
+    @Override
+    public void startRefresh() {
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
 
-    @Override public boolean isRefreshing() {
+    @Override
+    public boolean isRefreshing() {
         return mSwipeRefreshLayout.isRefreshing();
     }
 
 
-    @Override public void enableSwipeRefreshLayout(boolean enable) {
+    @Override
+    public void enableSwipeRefreshLayout(boolean enable) {
         mSwipeRefreshLayout.setEnabled(enable);
     }
 
@@ -122,18 +152,20 @@ public class AutoStartFragment extends BaseFragment implements AutoStartView {
         mSwipeRefreshLayout.setOnRefreshListener(mAutoStartPresenter);
         TypedValue typedValue = new TypedValue();
         context.getTheme()
-               .resolveAttribute(R.attr.colorPrimary, typedValue, true);
+                .resolveAttribute(R.attr.colorPrimary, typedValue, true);
         mSwipeRefreshLayout.setColorSchemeColors(typedValue.data);
         mRecyclerFastScroller.attachRecyclerView(recyclerView);
     }
 
 
-    @Override public void showSnackbar(String message) {
+    @Override
+    public void showSnackbar(String message) {
         SnackbarUtils.show(mFloatingActionButton, message);
     }
 
 
-    @Override public void setFabVisible(boolean visible) {
+    @Override
+    public void setFabVisible(boolean visible) {
         mFloatingActionButton.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -148,7 +180,8 @@ public class AutoStartFragment extends BaseFragment implements AutoStartView {
     }
 
 
-    @Override public void onPreExecute() {
+    @Override
+    public void onPreExecute() {
         mCollapsingToolbarLayout.setTitle("0个应用");
         mWaveView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -158,13 +191,15 @@ public class AutoStartFragment extends BaseFragment implements AutoStartView {
     }
 
 
-    @Override public void onDestroy() {
+    @Override
+    public void onDestroy() {
         super.onDestroy();
         mAutoStartPresenter.onDestroy();
     }
 
 
-    @Override public void onPostExecute(AutoStartAdapter autoStartAdapter) {
+    @Override
+    public void onPostExecute(AutoStartAdapter autoStartAdapter) {
         mCollapsingToolbarLayout.setTitle(
                 autoStartAdapter.getList().size() + "个应用");
         mProgressBar.setVisibility(View.GONE);
@@ -172,13 +207,14 @@ public class AutoStartFragment extends BaseFragment implements AutoStartView {
     }
 
 
-    @Override public void onDestroyView() {
+    @Override
+    public void onDestroyView() {
         mAutoStartPresenter.onDestroy();
         super.onDestroyView();
     }
 
 
-    @OnClick(R.id.disableApps) public void disableApps() {
+    public void disableApps() {
         mAutoStartPresenter.disableApps();
     }
 }

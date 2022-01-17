@@ -9,10 +9,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import butterknife.Bind;
+
+import java.util.ArrayList;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.App;
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.base.BaseFragmentPageAdapter;
@@ -23,18 +25,15 @@ import edu.wkd.towave.memorycleaner.mvp.views.impl.activity.MainView;
 import edu.wkd.towave.memorycleaner.tools.SnackbarUtils;
 import edu.wkd.towave.memorycleaner.tools.ToolbarUtils;
 import edu.wkd.towave.memorycleaner.ui.activity.base.BaseActivity;
-import java.util.ArrayList;
-import javax.inject.Inject;
 
 public class MainActivity extends BaseActivity
         implements MainView, NavigationView.OnNavigationItemSelectedListener {
 
-    @Bind(R.id.viewpager) ViewPager mViewPager;
-    @Bind(R.id.tabLayout) TabLayout mTabLayout;
-    @Bind(R.id.nav_view) NavigationView navigationView;
-    @Bind(R.id.drawer_layout) DrawerLayout drawer;
-    @Bind(R.id.toolbar) Toolbar toolbar;
-    //@Bind(R.id.side_nav) LinearLayout mLinearLayout;
+    ViewPager mViewPager;
+    TabLayout mTabLayout;
+    NavigationView navigationView;
+    DrawerLayout drawer;
+    Toolbar toolbar;
     @Inject MainPresenter mMainPresenter;
 
     ActionBarDrawerToggle toggle;
@@ -46,6 +45,15 @@ public class MainActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         initializePresenter();
         mMainPresenter.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void bindView() {
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mTabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
     }
 
 

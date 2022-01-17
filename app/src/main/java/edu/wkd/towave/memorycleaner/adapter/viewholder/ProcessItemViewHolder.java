@@ -6,22 +6,24 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
 import edu.wkd.towave.memorycleaner.R;
 
 /**
  * Created by towave on 2016/5/16.
  */
 public class ProcessItemViewHolder extends RecyclerView.ViewHolder {
-    @Bind(R.id.icon) ImageView mImageView;
-    @Bind(R.id.name) TextView mTextView;
-    @Bind(R.id.memory) TextView mTextView2;
-    @Bind(R.id.is_clean) CheckBox mCheckBox;
+    ImageView mImageView;
+    TextView mTextView;
+    TextView mTextView2;
+    CheckBox mCheckBox;
 
     public ProcessItemViewHolder(View parent) {
         super(parent);
-        ButterKnife.bind(this, parent);
+        mImageView = (ImageView) parent.findViewById(R.id.icon);
+        mTextView = (TextView) parent.findViewById(R.id.name);
+        mTextView2 = (TextView) parent.findViewById(R.id.memory);
+        mCheckBox = (CheckBox) parent.findViewById(R.id.is_clean);
     }
 
 

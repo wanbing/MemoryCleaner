@@ -5,7 +5,11 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import butterknife.Bind;
+
+import java.util.ArrayList;
+
+import javax.inject.Inject;
+
 import edu.wkd.towave.memorycleaner.App;
 import edu.wkd.towave.memorycleaner.R;
 import edu.wkd.towave.memorycleaner.adapter.base.BaseFragmentPageAdapter;
@@ -15,24 +19,31 @@ import edu.wkd.towave.memorycleaner.mvp.presenters.impl.activity.AutoStartManage
 import edu.wkd.towave.memorycleaner.mvp.views.impl.activity.AutoStartManageView;
 import edu.wkd.towave.memorycleaner.tools.ToolbarUtils;
 import edu.wkd.towave.memorycleaner.ui.activity.base.BaseActivity;
-import java.util.ArrayList;
-import javax.inject.Inject;
 
 public class AutoStartManage extends BaseActivity implements AutoStartManageView {
 
-    @Bind(R.id.toolbar) Toolbar mToolbar;
-    @Bind(R.id.tabs) TabLayout mTabs;
-    @Bind(R.id.container) ViewPager mContainer;
+    Toolbar mToolbar;
+    TabLayout mTabs;
+    ViewPager mContainer;
 
-    @Inject AutoStartManagePresenter mAutoStartManagePresenter;
+    @Inject
+    AutoStartManagePresenter mAutoStartManagePresenter;
 
     BaseFragmentPageAdapter mBaseFragmentPageAdapter;
 
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializePresenter();
         mAutoStartManagePresenter.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void bindView() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mTabs = (TabLayout) findViewById(R.id.tabs);
+        mContainer = (ViewPager) findViewById(R.id.container);
     }
 
 
@@ -41,20 +52,22 @@ public class AutoStartManage extends BaseActivity implements AutoStartManageView
     }
 
 
-    @Override protected void initializeDependencyInjector() {
+    @Override
+    protected void initializeDependencyInjector() {
         App app = (App) getApplication();
         mActivityComponent = DaggerActivityComponent.builder()
-                                                    .activityModule(
-                                                            new ActivityModule(
-                                                                    this))
-                                                    .appComponent(
-                                                            app.getAppComponent())
-                                                    .build();
+                .activityModule(
+                        new ActivityModule(
+                                this))
+                .appComponent(
+                        app.getAppComponent())
+                .build();
         mActivityComponent.inject(this);
     }
 
 
-    @Override public void initToolbar() {
+    @Override
+    public void initToolbar() {
         ToolbarUtils.initToolbar(mToolbar, this);
     }
 
@@ -71,7 +84,8 @@ public class AutoStartManage extends BaseActivity implements AutoStartManageView
         mTabs.setupWithViewPager(mContainer);
     }
 
-    @Override protected int getLayoutView() {
+    @Override
+    protected int getLayoutView() {
         return R.layout.activity_app_manage;
     }
 }
